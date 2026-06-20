@@ -1,0 +1,22 @@
+{
+	"authors": [
+		"Pordohiq"
+	],
+	"copyright": "Copyright © 2026, Pordohiq",
+	"description": "A Parser for different Audio files written in betterC (dlang).",
+	"license": "BSL-1.0",
+	"name": "my_audio_parser",
+	"targetName":"mapd.dc",
+	"targetType":"executable",
+	"dflags": [
+		"-betterC",
+		"-mtriple=x86_64-unknown-linux-musl",
+		"-gcc=musl-gcc",
+		"-Xcc=-static",
+		"-Os",
+		"-flto=full",
+		"-boundscheck=off"
+	],
+	"sourcePaths":["."],
+	"importPaths":["."]
+}
