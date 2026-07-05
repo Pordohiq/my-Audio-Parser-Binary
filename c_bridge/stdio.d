@@ -2,7 +2,7 @@ module stdio;
 
 import convert;
 
-import core.stdc.stdio : printf, FILE, fopen, fclose, ftell, fseek, SEEK_END, fread;
+public import core.stdc.stdio;
 import core.stdc.string : strlen;
 import core.stdc.stdlib : malloc, free;
 
@@ -37,8 +37,21 @@ void print(string[] array, string end="\n", string delim=", ")
 {
     print(array.join_array(delim), end);
 }
+
+void print(bool value, string end="\n")
+{
+    print(value ? "true" : "false", end);
+}
 //endregion
 //region FILES
+enum FileMode
+{
+	READ_BYTES = "rb",
+	WRITE_BYTES = "wb",
+	READ_TEXT = "r",
+	WRITE_TEXT = "w"
+}
+
 bool file_exists(string path)
 {
     FILE *fp = fopen(path.ptr, "r");
@@ -88,5 +101,26 @@ ubyte[] read_file_bytes(string path)
 	}
 
 	return buffer;
+}
+
+FILE *open_file(string path, FileMode fm)
+{
+	FILE *file = fopen(path.ptr, (cast(string) fm).ptr);
+	return file;
+}
+
+ulong read_buffer(FILE* file, ubyte* buffer, ulong length, ulong offset = 0)
+{
+	if (!file)
+		return 0;
+
+	file.fseek(offset, 0);
+
+	return fread(buffer, 1, length, file);
+}
+
+void close_file(FILE* ptr)
+{
+	fclose(ptr);
 }
 //endregion

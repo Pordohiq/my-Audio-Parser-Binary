@@ -53,6 +53,7 @@ string join_array(string[] arr, string delim = ", ")
     return cast(string)buffer[0 .. totalLen];
 }
 
+//region toString
 string toString(long value)
 {
     int len = snprintf(null, 0, "%lld".ptr, value);
@@ -111,4 +112,54 @@ string toString(const ubyte[] values)
     free(hexArr.ptr);
 
     return result;
+}
+//endregion
+//region asBytes
+ubyte[] asBytes(string text)
+{
+    return cast(ubyte[]) text;
+}
+//endregion
+ulong asUlong(ubyte[8] bytes, bool little_endian = true)
+{
+	if (little_endian)
+	{
+		return (cast(ulong)bytes[0])       |
+			(cast(ulong)bytes[1] << 8)  |
+			(cast(ulong)bytes[2] << 16) |
+			(cast(ulong)bytes[3] << 24) |
+			(cast(ulong)bytes[4] << 32) |
+			(cast(ulong)bytes[5] << 40) |
+			(cast(ulong)bytes[6] << 48) |
+			(cast(ulong)bytes[7] << 56);
+    }
+    else
+    {
+		return (cast(ulong)bytes[7])       |
+			(cast(ulong)bytes[6] << 8)  |
+			(cast(ulong)bytes[5] << 16) |
+			(cast(ulong)bytes[4] << 24) |
+			(cast(ulong)bytes[3] << 32) |
+			(cast(ulong)bytes[2] << 40) |
+			(cast(ulong)bytes[1] << 48) |
+			(cast(ulong)bytes[0] << 56);
+	}
+}
+
+uint asUint(ubyte[4] bytes, bool little_endian = true)
+{
+	if (little_endian)
+	{
+		return (cast(uint)bytes[0])       |
+			(cast(uint)bytes[1] << 8)  |
+			(cast(uint)bytes[2] << 16) |
+			(cast(uint)bytes[3] << 24);
+    }
+    else
+    {
+		return (cast(uint)bytes[3])	|
+			(cast(uint)bytes[2] << 8)  |
+			(cast(uint)bytes[1] << 16) |
+			(cast(uint)bytes[0] << 24);
+    }
 }

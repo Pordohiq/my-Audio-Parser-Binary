@@ -10,9 +10,6 @@
 	"targetType":"executable",
 	"dflags": [
 		"-betterC",
-		"-mtriple=x86_64-unknown-linux-musl",
-		"-gcc=musl-gcc",
-		"-Xcc=-static",
 		"-Os",
 		"-flto=full",
 		"-boundscheck=off"
