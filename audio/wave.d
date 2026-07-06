@@ -2,6 +2,10 @@ module audio.wave;
 
 import container.riff;
 
+import betterc.stdio;
+import betterc.stdlib;
+import betterc.convert;
+
 import audio_data;
 
 const ubyte[4] WAVE_HEADER = ['W', 'A', 'V', 'E'];
@@ -11,12 +15,62 @@ bool is_stream_wave(ubyte[] stream)
     if (stream.length < 12)
         return false;
 
-    ubyte[4] riff_header = stream[0 .. 4];
     ubyte[4] wave_header = stream[8 .. 12];
 
-    return (riff_header == RIFF_HEADER) && (wave_header == WAVE_HEADER);
+    return stream.is_stream_riff && (wave_header == WAVE_HEADER);
 }
 
-void read_stream_specs_wave(ubyte[] stream)
+bool is_file_wave(FILE* file)
 {
+    if (file == null)
+        return false;
+
+    ubyte[12] header;
+
+    ulong bytes_read = read_buffer(file, header.ptr, 12, 0);
+
+    if (bytes_read != 12)
+        return false;
+
+    return is_stream_wave(header);
+}
+
+struct WaveSpecs
+{
+    ushort encoding;
+    ushort channels;
+    uint sample_rate;
+    uint byte_rate;
+    ushort block_align;
+    ushort bit_depth;
+}
+
+WaveSpecs read_file_specs_wave(FILE* file)
+{
+    if (!file)
+        return WaveSpecs();
+
+    if (!file.is_file_wave)
+        return WaveSpecs();
+
+    ulong fmt_chunk_position = get_block_pointer("fmt ".asBytes[0 .. 4], file);
+
+    ubyte[] fmt_chunk = read_block_body(file, fmt_chunk_position);
+
+    if (fmt_chunk.length != 16)
+        print(
+            "WARNING: There is more data in the 'fmt ' than we know of. Unknown parts of the data will be ignored.");
+
+    WaveSpecs spec = WaveSpecs();
+
+    spec.encoding = fmt_chunk[0 .. 2].asUshort;
+    spec.channels = fmt_chunk[2 .. 4].asUshort;
+    spec.sample_rate = fmt_chunk[4 .. 8].asUint;
+    spec.byte_rate = fmt_chunk[8 .. 12].asUint;
+    spec.block_align = fmt_chunk[12 .. 14].asUshort;
+    spec.bit_depth = fmt_chunk[14 .. 16].asUshort;
+
+    free(fmt_chunk.ptr);
+
+    return spec;
 }

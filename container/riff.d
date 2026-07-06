@@ -1,7 +1,8 @@
 module container.riff;
 
-import stdio;
-import convert;
+import betterc.stdio;
+import betterc.convert;
+import betterc.stdlib;
 
 const ubyte[4] RIFF_HEADER = ['R', 'I', 'F', 'F'];
 
@@ -17,7 +18,7 @@ bool is_stream_riff(ubyte[] stream)
     return riff_header == RIFF_HEADER;
 }
 
-bool is_file_riff(FILE *file)
+bool is_file_riff(FILE* file)
 {
     if (file == null)
         return false;
@@ -29,15 +30,13 @@ bool is_file_riff(FILE *file)
     if (bytes_read != 4)
         return false;
 
-    print(header.toString);
-
     return is_stream_riff(header);
 }
 
 /// Gets the offset of given chunk from the beginning of the file.
 /// It gives back the offset of the HEADER and not the BODY!
 /// If any error occurs, it returns 0!
-ulong get_block_pointer(ubyte[4] block_name, FILE *file)
+ulong get_block_pointer(ubyte[4] block_name, FILE* file)
 {
     if (!file)
         return 0;
@@ -54,7 +53,7 @@ ulong get_block_pointer(ubyte[4] block_name, FILE *file)
 
     while (max_pointer_position > pointer_position)
     {
-        ubyte[8] subchunk_header;
+        ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
 
         bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, pointer_position);
 
@@ -71,4 +70,28 @@ ulong get_block_pointer(ubyte[4] block_name, FILE *file)
     }
 
     return 0;
+}
+
+ubyte[] read_block_body(FILE* file, ulong header_position)
+{
+    if (!file)
+        return [];
+
+    ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
+
+    ulong bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, header_position);
+
+    if (bytes_read != RIFF_SUBCHUNK_HEADER_SIZE)
+        return [];
+
+    ulong chunk_size = (subchunk_header[4 .. 8]).asUint;
+
+    ubyte[] chunk = allocate_array!ubyte(chunk_size);
+
+    bytes_read = read_buffer(file, chunk.ptr, chunk_size, header_position + RIFF_SUBCHUNK_HEADER_SIZE);
+
+    if (bytes_read != chunk_size)
+        return [];
+
+    return chunk;
 }

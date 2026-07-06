@@ -1,6 +1,6 @@
-module stdio;
+module betterc.stdio;
 
-import convert;
+import betterc.convert;
 
 public import core.stdc.stdio;
 import core.stdc.string : strlen;
@@ -8,39 +8,40 @@ import core.stdc.stdlib : malloc, free;
 
 string[] parse_arguments(int argc, char** argv)
 {
-    string[] args;
+	string[] args;
 	if (argc > 0)
 	{
 		void* mem = malloc(argc * string.sizeof);
-		if (!mem) return [];
+		if (!mem)
+			return [];
 
-		args = (cast(string*)mem)[0 .. argc];
+		args = (cast(string*) mem)[0 .. argc];
 
 		foreach (i; 0 .. argc)
 		{
 			char* ptr = argv[i];
 			size_t len = strlen(ptr);
-			args[i] = cast(string)ptr[0 .. len];
+			args[i] = cast(string) ptr[0 .. len];
 		}
 	}
 	return args;
 }
 
 //region PRINT
-void print(string message, string end="\n")
+void print(string message, string end = "\n")
 {
-    printf(message.ptr);
-    printf(end.ptr);
+	printf(message.ptr);
+	printf(end.ptr);
 }
 
-void print(string[] array, string end="\n", string delim=", ")
+void print(string[] array, string end = "\n", string delim = ", ")
 {
-    print(array.join_array(delim), end);
+	print(array.join_array(delim), end);
 }
 
-void print(bool value, string end="\n")
+void print(bool value, string end = "\n")
 {
-    print(value ? "true" : "false", end);
+	print(value ? "true" : "false", end);
 }
 //endregion
 //region FILES
@@ -54,21 +55,24 @@ enum FileMode
 
 bool file_exists(string path)
 {
-    FILE *fp = fopen(path.ptr, "r");
-    bool exists = (fp != null);
-    if (exists) fclose(fp);
-    return exists;
+	FILE* fp = fopen(path.ptr, "r");
+	bool exists = (fp != null);
+	if (exists)
+		fclose(fp);
+	return exists;
 }
 
-long get_file_size(string filename) {
-    FILE *fp = fopen(filename.ptr, "rb");
-    if (!fp) return -1;
+long get_file_size(string filename)
+{
+	FILE* fp = fopen(filename.ptr, "rb");
+	if (!fp)
+		return -1;
 
-    fseek(fp, 0, SEEK_END);
-    long size = ftell(fp);
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
 
-    fclose(fp);
-    return size;
+	fclose(fp);
+	return size;
 }
 
 ubyte[] read_file_bytes(string path)
@@ -79,10 +83,10 @@ ubyte[] read_file_bytes(string path)
 		return [];
 	}
 
-	FILE *file = fopen(path.ptr, "rb");
+	FILE* file = fopen(path.ptr, "rb");
 
 	ubyte[] buffer;
-	void* mem = malloc(cast(size_t)f_size);
+	void* mem = malloc(cast(size_t) f_size);
 
 	if (!mem)
 	{
@@ -90,7 +94,7 @@ ubyte[] read_file_bytes(string path)
 		return [];
 	}
 
-	buffer = (cast(ubyte*)mem)[0 .. cast(size_t)f_size];
+	buffer = (cast(ubyte*) mem)[0 .. cast(size_t) f_size];
 
 	size_t bytesRead = fread(buffer.ptr, 1, buffer.length, file);
 	if (bytesRead != buffer.length)
@@ -103,9 +107,9 @@ ubyte[] read_file_bytes(string path)
 	return buffer;
 }
 
-FILE *open_file(string path, FileMode fm)
+FILE* open_file(string path, FileMode fm)
 {
-	FILE *file = fopen(path.ptr, (cast(string) fm).ptr);
+	FILE* file = fopen(path.ptr, (cast(string) fm).ptr);
 	return file;
 }
 
