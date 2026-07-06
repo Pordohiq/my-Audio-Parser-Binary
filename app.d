@@ -25,6 +25,7 @@ extern (C) int main(int argc, char** argv)
 	{
 		FILE* file = open_file("./tests/wave_48k_s16_2.wav", FileMode.READ_BYTES);
 		print(is_file_riff(file));
+		print(get_block_pointer("fmt ".asBytes[0 .. 4], file).toString);
 	}
 
 	return 0;

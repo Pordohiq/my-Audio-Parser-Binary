@@ -4,7 +4,7 @@
 	],
 	"copyright": "Copyright © 2026, Pordohiq",
 	"description": "A Parser for different Audio files written in betterC (dlang).",
-	"license": "BSL-1.0",
+	"license": "MIT",
 	"name": "my_audio_parser",
 	"targetName":"mapd.dc",
 	"targetType":"executable",
