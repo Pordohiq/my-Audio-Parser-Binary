@@ -1,13 +1,33 @@
 module betterc.stdlib;
 
 public import core.stdc.stdlib;
+import core.stdc.string : memcpy;
 
-T[] allocate_array(T)(ulong length) @nogc
+/// Allocates a dynamic array on the heap
+@nogc nothrow
+T[] allocate_array(T)(ulong length)
 {
 	T* ptr = cast(T*) malloc(T.sizeof * length);
 
 	if (!ptr)
-		return null;
+		return [];
 
 	return ptr[0 .. length];
+}
+
+@nogc nothrow
+T[] copy_array(T)(T[] original_array, ulong start_index, ulong end_index)
+{
+	if (start_index >= end_index)
+		return [];
+
+	if (end_index >= original_array.length)
+		return [];
+
+	ulong new_length = end_index - start_index;
+	T[] new_array = allocate_array!T(new_length);
+
+	memcpy(new_array.ptr, original_array.ptr + start_index, new_length);
+
+	return new_array;
 }

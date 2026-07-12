@@ -12,65 +12,110 @@ const ubyte[4] WAVE_HEADER = ['W', 'A', 'V', 'E'];
 
 bool is_stream_wave(ubyte[] stream)
 {
-    if (stream.length < 12)
-        return false;
+	if (stream.length < 12)
+		return false;
 
-    ubyte[4] wave_header = stream[8 .. 12];
+	ubyte[4] wave_header = stream[8 .. 12];
 
-    return stream.is_stream_riff && (wave_header == WAVE_HEADER);
+	return stream.is_stream_riff && (wave_header == WAVE_HEADER);
 }
 
 bool is_file_wave(FILE* file)
 {
-    if (file == null)
-        return false;
+	if (file == null)
+		return false;
 
-    ubyte[12] header;
+	ubyte[12] header;
 
-    ulong bytes_read = read_buffer(file, header.ptr, 12, 0);
+	ulong bytes_read = read_buffer(file, header.ptr, 12, 0);
 
-    if (bytes_read != 12)
-        return false;
+	if (bytes_read != 12)
+		return false;
 
-    return is_stream_wave(header);
+	return is_stream_wave(header);
 }
 
 struct WaveSpecs
 {
-    ushort encoding;
-    ushort channels;
-    uint sample_rate;
-    uint byte_rate;
-    ushort block_align;
-    ushort bit_depth;
+	ushort encoding;
+	ushort channels;
+	uint sample_rate;
+	uint byte_rate;
+	ushort block_align;
+	ushort bit_depth;
 }
 
 WaveSpecs read_file_specs_wave(FILE* file)
 {
-    if (!file)
-        return WaveSpecs();
+	if (!file)
+		return WaveSpecs();
 
-    if (!file.is_file_wave)
-        return WaveSpecs();
+	if (!file.is_file_wave)
+		return WaveSpecs();
 
-    ulong fmt_chunk_position = get_block_pointer("fmt ".asBytes[0 .. 4], file);
+	ulong fmt_chunk_position = get_block_pointer("fmt ".asBytes[0 .. 4], file);
 
-    ubyte[] fmt_chunk = read_block_body(file, fmt_chunk_position);
+	ubyte[] fmt_chunk = read_block_body(file, fmt_chunk_position);
 
-    if (fmt_chunk.length != 16)
-        print(
-            "WARNING: There is more data in the 'fmt ' than we know of. Unknown parts of the data will be ignored.");
+	if (fmt_chunk.length > 16)
+		print(
+			"WARNING: There is more data in the 'fmt ' than we know of. Unknown parts of the data will be ignored.");
 
-    WaveSpecs spec = WaveSpecs();
+	WaveSpecs spec = WaveSpecs();
 
-    spec.encoding = fmt_chunk[0 .. 2].asUshort;
-    spec.channels = fmt_chunk[2 .. 4].asUshort;
-    spec.sample_rate = fmt_chunk[4 .. 8].asUint;
-    spec.byte_rate = fmt_chunk[8 .. 12].asUint;
-    spec.block_align = fmt_chunk[12 .. 14].asUshort;
-    spec.bit_depth = fmt_chunk[14 .. 16].asUshort;
+	spec.encoding = fmt_chunk[0 .. 2].asUshort;
+	spec.channels = fmt_chunk[2 .. 4].asUshort;
+	spec.sample_rate = fmt_chunk[4 .. 8].asUint;
+	spec.byte_rate = fmt_chunk[8 .. 12].asUint;
+	spec.block_align = fmt_chunk[12 .. 14].asUshort;
+	spec.bit_depth = fmt_chunk[14 .. 16].asUshort;
 
-    free(fmt_chunk.ptr);
+	//TODO: Verify that the different attributes match; ISSUE 1.
 
-    return spec;
+	free(fmt_chunk.ptr);
+
+	return spec;
+}
+
+AudioMetaData read_metadata_wave(FILE* file)
+{
+	if (!file)
+		return AudioMetaData();
+
+	if (!file.is_file_wave)
+		return AudioMetaData();
+
+	ulong list_chunk_position = get_block_pointer("LIST".asBytes[0 .. 4], file);
+
+	ubyte[] list_chunk = read_block_body(file, list_chunk_position);
+
+	if (list_chunk[0 .. 4] != "INFO".asBytes[0 .. 4])
+	{
+		print(
+			"WARNING: First LIST subchunck is not the INFO chunck. Other behaviour not yet implemented.");
+		return AudioMetaData();
+	}
+
+	AudioMetaData amd = AudioMetaData();
+
+	ulong pointer = 4;
+	while (pointer < list_chunk.length)
+	{
+		ubyte[4] value_name = list_chunk[pointer .. pointer + 4];
+		uint value_length = (list_chunk[pointer + 4 .. pointer + 8])[0 .. 4].asUint;
+		pointer += 8;
+
+		ubyte[] value = copy_array!ubyte(list_chunk, pointer, pointer + value_length);
+		if (value.length == 0)
+		{
+			return AudioMetaData();
+		}
+
+		pointer += value_length;
+
+		print(cast(string) value);
+
+	}
+
+	return AudioMetaData();
 }
