@@ -4,7 +4,7 @@ public import core.stdc.stdlib;
 import core.stdc.string : memcpy;
 
 /// Allocates a dynamic array on the heap
-@nogc nothrow
+nothrow @system @nogc
 T[] allocate_array(T)(ulong length)
 {
 	T* ptr = cast(T*) malloc(T.sizeof * length);
@@ -15,7 +15,7 @@ T[] allocate_array(T)(ulong length)
 	return ptr[0 .. length];
 }
 
-@nogc nothrow
+nothrow @system @nogc
 T[] copy_array(T)(T[] original_array, ulong start_index, ulong end_index)
 {
 	if (start_index >= end_index)

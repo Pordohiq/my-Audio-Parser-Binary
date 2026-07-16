@@ -6,3 +6,5 @@
 **/*.obj
 **/*.lst
 **/*.dc
+
+*-test-application

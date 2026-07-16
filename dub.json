@@ -6,14 +6,23 @@
 	"description": "A Parser for different Audio files written in betterC (dlang).",
 	"license": "MIT",
 	"name": "my_audio_parser",
-	"targetName":"mapd.dc",
-	"targetType":"executable",
+	"targetName": "mapb.dc",
+	"targetType": "executable",
 	"dflags": [
-		"-betterC",
-		"-Os",
-		"-flto=full",
-		"-boundscheck=off"
+		"-betterC"
 	],
-	"sourcePaths":["."],
-	"importPaths":["."]
+	"buildTypes": {
+		"release": {
+			"dflags": [
+				"-Os",
+				"-flto=full"
+			]
+		}
+	},
+	"sourcePaths": [
+		"."
+	],
+	"importPaths": [
+		"."
+	]
 }

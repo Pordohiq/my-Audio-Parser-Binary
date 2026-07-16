@@ -1,5 +1,7 @@
 module betterc.convert;
 
+import betterc.stdlib : allocate_array;
+
 import core.stdc.stdlib : malloc, free;
 import core.stdc.stdio : snprintf;
 
@@ -129,6 +131,22 @@ ubyte[] asBytes(string text)
     return cast(ubyte[]) text;
 }
 //endregion
+//region asAddress
+nothrow @nogc
+string toAddress(ulong value)
+{
+    char[] buffer = allocate_array!char(16);
+    const char[] hexDigits = "0123456789abcdef";
+
+    for (size_t i = 0; i < 16; i++)
+    {
+        buffer[15 - i] = hexDigits[(value >> (i * 4)) & 0xF];
+    }
+
+    return cast(string) buffer;
+}
+//endregion
+
 ulong asUlong(ubyte[8] bytes, bool little_endian = true)
 {
     if (little_endian)

@@ -5,6 +5,7 @@ import container.riff;
 import betterc.stdio;
 import betterc.stdlib;
 import betterc.convert;
+import betterc.algorithm;
 
 import audio_data;
 
@@ -89,11 +90,22 @@ AudioMetaData read_metadata_wave(FILE* file)
 
 	ubyte[] list_chunk = read_block_body(file, list_chunk_position);
 
-	if (list_chunk[0 .. 4] != "INFO".asBytes[0 .. 4])
+	bool is_valid = (list_chunk.length >= 4) && list_chunk.startsWith("INFO".asBytes);
+
+	while (!is_valid)
 	{
-		print(
-			"WARNING: First LIST subchunck is not the INFO chunck. Other behaviour not yet implemented.");
-		return AudioMetaData();
+		list_chunk_position += RIFF_SUBCHUNK_HEADER_SIZE + list_chunk.length +  // Length of this chunck with header
+			(
+				(list_chunk.length % 2 == 0) ? 0 : 1); // Account for the padding byte.
+
+		list_chunk_position = get_block_pointer("LIST".asBytes[0 .. 4], file, list_chunk_position);
+
+		if (list_chunk_position == 0)
+			return AudioMetaData();
+
+		list_chunk = read_block_body(file, list_chunk_position);
+
+		is_valid = (list_chunk.length > 4) && list_chunk.startsWith("INFO".asBytes);
 	}
 
 	AudioMetaData amd = AudioMetaData();

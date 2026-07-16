@@ -53,12 +53,15 @@ enum FileMode
 	WRITE_TEXT = "w"
 }
 
+nothrow
 bool file_exists(string path)
 {
 	FILE* fp = fopen(path.ptr, "r");
+
 	bool exists = (fp != null);
 	if (exists)
 		fclose(fp);
+
 	return exists;
 }
 

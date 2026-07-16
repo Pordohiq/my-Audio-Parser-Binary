@@ -18,9 +18,7 @@ int main(int argc, char** argv)
 
 	if (args.length > 1)
 	{
-		FILE* file = open_file("./tests/wave_48k_u8le_1.wav", FileMode.READ_BYTES);
-		print(is_file_riff(file));
-		print(get_block_pointer("fmt ".asBytes[0 .. 4], file).toString);
+		FILE* file = open_file(args[1], FileMode.READ_BYTES);
 		read_file_specs_wave(file);
 		read_metadata_wave(file);
 		close_file(file);

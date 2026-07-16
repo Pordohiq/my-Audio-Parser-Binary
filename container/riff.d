@@ -35,21 +35,23 @@ bool is_file_riff(FILE* file)
 
 /// Gets the offset of given chunk from the beginning of the file.
 /// It gives back the offset of the HEADER and not the BODY!
-/// If any error occurs, it returns 0!
-ulong get_block_pointer(ubyte[4] block_name, FILE* file)
+/// If any error occurs, it returns 0 !
+/// Be careful using starting pointer, as it MUST always point to 
+/// the starting FOURCC of a subchunck.
+ulong get_block_pointer(ubyte[4] block_name, FILE* file, ulong starting_pointer = 12)
 {
     if (!file)
         return 0;
 
     ubyte[4] fsize_buffer;
 
-    ulong bytes_read = read_buffer(file, fsize_buffer.ptr, 4, 5);
+    ulong bytes_read = read_buffer(file, fsize_buffer.ptr, 4, 4);
     if (bytes_read != 4)
         return 0;
 
     ulong max_pointer_position = fsize_buffer.asUint() + 4;
 
-    ulong pointer_position = 12;
+    ulong pointer_position = starting_pointer;
 
     while (max_pointer_position > pointer_position)
     {
@@ -66,7 +68,11 @@ ulong get_block_pointer(ubyte[4] block_name, FILE* file)
         if (block_name == subchunk_header_name)
             return pointer_position;
 
-        pointer_position += (subchunk_header_size.asUint) + RIFF_SUBCHUNK_HEADER_SIZE;
+        pointer_position += subchunk_header_size.asUint
+            + RIFF_SUBCHUNK_HEADER_SIZE
+            + (
+                ( // Account for the single padding byte on odd length blocks.
+                    subchunk_header_size.asUint % 2 == 0) ? 0 : 1);
     }
 
     return 0;
