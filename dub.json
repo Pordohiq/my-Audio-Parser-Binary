@@ -24,5 +24,22 @@
 	],
 	"importPaths": [
 		"."
+	],
+	"configurations": [
+		{
+			"name": "default",
+			"platforms": [
+				"posix"
+			]
+		},
+		{
+			"name": "windows-app",
+			"platforms": [
+				"posix"
+			],
+			"lflags": [
+				"-fuse-ld=lld"
+			]
+		}
 	]
 }

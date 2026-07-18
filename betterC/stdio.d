@@ -45,6 +45,17 @@ void print(bool value, string end = "\n")
 }
 //endregion
 //region FILES
+version (Windows)
+{
+	extern (C) nothrow @nogc
+	int _fseeki64(FILE* stream, long offset, int origin);
+}
+else version (Posix)
+{
+	extern (C) nothrow @nogc
+	int fseeko(FILE* stream, long offset, int whence);
+}
+
 enum FileMode
 {
 	READ_BYTES = "rb",
@@ -53,7 +64,7 @@ enum FileMode
 	WRITE_TEXT = "w"
 }
 
-nothrow
+nothrow @nogc
 bool file_exists(string path)
 {
 	FILE* fp = fopen(path.ptr, "r");
@@ -78,6 +89,9 @@ long get_file_size(string filename)
 	return size;
 }
 
+/// Reads the entire File at the path in rb mode 
+/// and returns the slice to the allocated heap
+/// array that it filled with the file contents.
 ubyte[] read_file_bytes(string path)
 {
 	long f_size = get_file_size(path);
@@ -121,7 +135,18 @@ ulong read_buffer(FILE* file, ubyte* buffer, ulong length, ulong offset = 0)
 	if (!file)
 		return 0;
 
-	file.fseek(offset, 0);
+	version (Windows)
+	{
+		int error = _fseeki64(file, cast(long) offset, SEEK_SET);
+		if (error)
+			return 0;
+	}
+	else version (Posix)
+	{
+		int error = fseeko(file, cast(long) offset, SEEK_SET);
+		if (error)
+			return 0;
+	}
 
 	return fread(buffer, 1, length, file);
 }
