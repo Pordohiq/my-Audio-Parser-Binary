@@ -54,7 +54,7 @@ WaveSpecs read_file_specs_wave(FILE* file)
 	if (!file.is_file_wave)
 		return WaveSpecs();
 
-	ulong fmt_chunk_position = get_block_pointer("fmt ".asBytes[0 .. 4], file);
+	ulong fmt_chunk_position = file.get_block_pointer("fmt ".asBytes[0 .. 4]);
 
 	ubyte[] fmt_chunk = read_block_body(file, fmt_chunk_position);
 
@@ -86,7 +86,7 @@ AudioMetaData read_metadata_wave(FILE* file)
 	if (!file.is_file_wave)
 		return AudioMetaData();
 
-	ulong list_chunk_position = get_block_pointer("LIST".asBytes[0 .. 4], file);
+	ulong list_chunk_position = file.get_block_pointer("LIST".asBytes[0 .. 4]);
 
 	ubyte[] list_chunk = read_block_body(file, list_chunk_position);
 
@@ -98,7 +98,7 @@ AudioMetaData read_metadata_wave(FILE* file)
 			(
 				(list_chunk.length % 2 == 0) ? 0 : 1); // Account for the padding byte.
 
-		list_chunk_position = get_block_pointer("LIST".asBytes[0 .. 4], file, list_chunk_position);
+		list_chunk_position = file.get_block_pointer("LIST".asBytes[0 .. 4], list_chunk_position);
 
 		if (list_chunk_position == 0)
 			return AudioMetaData();

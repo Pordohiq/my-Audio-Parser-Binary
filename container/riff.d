@@ -10,27 +10,27 @@ const ubyte RIFF_SUBCHUNK_HEADER_SIZE = 8;
 
 bool is_stream_riff(ubyte[] stream)
 {
-    if (stream.length < 4)
-        return false;
+	if (stream.length < 4)
+		return false;
 
-    ubyte[4] riff_header = stream[0 .. 4];
+	ubyte[4] riff_header = stream[0 .. 4];
 
-    return riff_header == RIFF_HEADER;
+	return riff_header == RIFF_HEADER;
 }
 
 bool is_file_riff(FILE* file)
 {
-    if (file == null)
-        return false;
+	if (file == null)
+		return false;
 
-    ubyte[4] header;
+	ubyte[4] header;
 
-    ulong bytes_read = read_buffer(file, header.ptr, 4, 0);
+	ulong bytes_read = read_buffer(file, header.ptr, 4, 0);
 
-    if (bytes_read != 4)
-        return false;
+	if (bytes_read != 4)
+		return false;
 
-    return is_stream_riff(header);
+	return is_stream_riff(header);
 }
 
 /// Gets the offset of given chunk from the beginning of the file.
@@ -38,66 +38,67 @@ bool is_file_riff(FILE* file)
 /// If any error occurs, it returns 0 !
 /// Be careful using starting pointer, as it MUST always point to 
 /// the starting FOURCC of a subchunck.
-ulong get_block_pointer(ubyte[4] block_name, FILE* file, ulong starting_pointer = 12)
+ulong get_block_pointer(FILE* file, ubyte[4] block_name, ulong starting_pointer = 12)
 {
-    if (!file)
-        return 0;
+	if (!file)
+		return 0;
 
-    ubyte[4] fsize_buffer;
+	ubyte[4] fsize_buffer;
 
-    ulong bytes_read = read_buffer(file, fsize_buffer.ptr, 4, 4);
-    if (bytes_read != 4)
-        return 0;
+	ulong bytes_read = read_buffer(file, fsize_buffer.ptr, 4, 4);
+	if (bytes_read != 4)
+		return 0;
 
-    ulong max_pointer_position = fsize_buffer.asUint() + 4;
+	ulong max_pointer_position = fsize_buffer.asUint() + 4;
 
-    ulong pointer_position = starting_pointer;
+	ulong pointer_position = starting_pointer;
 
-    while (max_pointer_position > pointer_position)
-    {
-        ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
+	while (max_pointer_position > pointer_position)
+	{
+		ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
 
-        bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, pointer_position);
+		bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, pointer_position);
 
-        if (bytes_read != RIFF_SUBCHUNK_HEADER_SIZE)
-            return 0;
+		if (bytes_read != RIFF_SUBCHUNK_HEADER_SIZE)
+			return 0;
 
-        ubyte[4] subchunk_header_name = subchunk_header[0 .. 4];
-        ubyte[4] subchunk_header_size = subchunk_header[4 .. 8];
+		ubyte[4] subchunk_header_name = subchunk_header[0 .. 4];
+		ubyte[4] subchunk_header_size = subchunk_header[4 .. 8];
 
-        if (block_name == subchunk_header_name)
-            return pointer_position;
+		// IF FOUND
+		if (block_name == subchunk_header_name)
+			return pointer_position;
 
-        pointer_position += subchunk_header_size.asUint
-            + RIFF_SUBCHUNK_HEADER_SIZE
-            + (
-                ( // Account for the single padding byte on odd length blocks.
-                    subchunk_header_size.asUint % 2 == 0) ? 0 : 1);
-    }
+		pointer_position += subchunk_header_size.asUint
+			+ RIFF_SUBCHUNK_HEADER_SIZE
+			+ (
+				( // Account for the single padding byte on odd length blocks.
+					subchunk_header_size.asUint % 2 == 0) ? 0 : 1);
+	}
 
-    return 0;
+	return 0;
 }
 
 ubyte[] read_block_body(FILE* file, ulong header_position)
 {
-    if (!file)
-        return [];
+	if (!file)
+		return [];
 
-    ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
+	ubyte[RIFF_SUBCHUNK_HEADER_SIZE] subchunk_header;
 
-    ulong bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, header_position);
+	ulong bytes_read = read_buffer(file, subchunk_header.ptr, RIFF_SUBCHUNK_HEADER_SIZE, header_position);
 
-    if (bytes_read != RIFF_SUBCHUNK_HEADER_SIZE)
-        return [];
+	if (bytes_read != RIFF_SUBCHUNK_HEADER_SIZE)
+		return [];
 
-    ulong chunk_size = (subchunk_header[4 .. 8]).asUint;
+	ulong chunk_size = (subchunk_header[4 .. 8]).asUint;
 
-    ubyte[] chunk = allocate_array!ubyte(chunk_size);
+	ubyte[] chunk = allocate_array!ubyte(chunk_size);
 
-    bytes_read = read_buffer(file, chunk.ptr, chunk_size, header_position + RIFF_SUBCHUNK_HEADER_SIZE);
+	bytes_read = read_buffer(file, chunk.ptr, chunk_size, header_position + RIFF_SUBCHUNK_HEADER_SIZE);
 
-    if (bytes_read != chunk_size)
-        return [];
+	if (bytes_read != chunk_size)
+		return [];
 
-    return chunk;
+	return chunk;
 }

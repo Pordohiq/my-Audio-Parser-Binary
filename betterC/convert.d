@@ -210,3 +210,16 @@ ushort asUshort(ubyte[2] bytes, bool little_endian = true)
         return (cast(ushort) bytes[1]) | (cast(ushort) bytes[0] << 8);
     }
 }
+
+//region toUbyte
+pure nothrow @safe @nogc
+ubyte toUbyte(const uint value)
+{
+    if (value > ubyte.max)
+    {
+        return 0;
+    }
+
+    return cast(ubyte) value;
+}
+//endregion
