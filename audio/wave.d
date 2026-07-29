@@ -71,7 +71,11 @@ WaveSpecs read_file_specs_wave(FILE* file)
 	spec.block_align = fmt_chunk[12 .. 14].asUshort;
 	spec.bit_depth = fmt_chunk[14 .. 16].asUshort;
 
-	//TODO: Verify that the different attributes match; ISSUE 1.
+	if (spec.block_align != (spec.channels * spec.bit_depth) / 8)
+		print("WARNING: file may be corrupted. 'block_align' doesn't match.");
+
+	if (spec.byte_rate != spec.sample_rate * spec.block_align)
+		print("WARNING: file may be corrupted. 'byte_rate' doesn't match.");
 
 	free(fmt_chunk.ptr);
 
