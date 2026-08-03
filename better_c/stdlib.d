@@ -16,7 +16,7 @@ T[] allocate_array(T)(ulong length)
 }
 
 nothrow
-void resize_array(T)(T[] array, ulong new_size)
+void resize_array(T)(ref T[] array, ulong new_size)
 {
 	T[] new_array = allocate_array!T(new_size);
 	for (ulong i = 0; i < array.length; i++)
@@ -24,23 +24,27 @@ void resize_array(T)(T[] array, ulong new_size)
 		new_array[i] = array[i];
 	}
 
-	array.ptr = new_array.ptr;
-	array.length = new_array.length;
+	array = new_array;
 }
 
 nothrow @system @nogc
-T[] copy_array(T)(T[] original_array, ulong start_index, ulong end_index)
+T[] copy_array(T)(const(T)[] original_array, ulong start_index, ulong end_index)
 {
-	if (start_index >= end_index)
-		return [];
-
-	if (end_index >= original_array.length)
+	if (start_index >= end_index || end_index > original_array.length)
 		return [];
 
 	ulong new_length = end_index - start_index;
 	T[] new_array = allocate_array!T(new_length);
+	if (new_array.ptr is null)
+		return [];
 
-	memcpy(new_array.ptr, original_array.ptr + start_index, new_length);
+	memcpy(new_array.ptr, original_array.ptr + start_index, new_length * T.sizeof);
 
 	return new_array;
+}
+
+nothrow @system @nogc
+T[] duplicate_array(T)(const(T)[] original_array)
+{
+	return copy_array!T(original_array, 0, original_array.length);
 }

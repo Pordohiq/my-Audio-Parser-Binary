@@ -2,7 +2,9 @@ module audio_data;
 
 import pcm;
 
+import betterc.cstring;
 import betterc.dictionary;
+import betterc.stdio : print;
 
 struct Audio
 {
@@ -12,12 +14,18 @@ struct Audio
 
 struct AudioMetaData
 {
-	string artist;
-	string title;
-	string album;
-	string number;
-	string year;
-	string genre;
+	Cstring title;
+	Cstring artist;
+	Cstring album;
+	Cstring track_number;
+	Cstring date;
+	Cstring genre;
 
-	Dictionary!(string, string) other_values;
+	Dictionary!(Cstring, Cstring) other_values;
+
+	string toString() const
+	{
+
+		return "";
+	}
 }

@@ -7,6 +7,7 @@ import betterc.stdlib;
 import betterc.convert;
 import betterc.algorithm;
 import betterc.dictionary;
+import betterc.cstring : Cstring;
 
 import audio_data;
 
@@ -121,14 +122,36 @@ AudioMetaData read_metadata_wave(FILE* file)
 		ubyte[] value = copy_array!ubyte(list_chunk, pointer, pointer + value_length);
 		if (value.length == 0)
 		{
-			return AudioMetaData();
+			continue;
 		}
 
-		pointer += value_length;
+		//Known fields.
+		if (value_name == "INAM".asBytes)
+			amd.title = Cstring(value);
 
-		print(cast(string) value);
+		else if (value_name == "IART".asBytes)
+			amd.artist = Cstring(value);
 
+		else if (value_name == "ICRD".asBytes)
+			amd.date = Cstring(value);
+
+		else if (value_name == "IPRD".asBytes || value_name == "ILBC")
+			amd.album = Cstring(value);
+
+		else if (value_name == "IGNR".asBytes)
+			amd.genre = Cstring(value);
+
+		else if (value_name == "ITRK".asBytes)
+			amd.track_number = Cstring(value);
+
+		else
+		{
+			ubyte[] name_array = duplicate_array(value_name);
+			amd.other_values.set_value(Cstring(name_array), Cstring(value));
+		}
+
+		pointer += value_length + ((value_length % 2 == 0) ? 0 : 1);
 	}
 
-	return AudioMetaData();
+	return amd;
 }

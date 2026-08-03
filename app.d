@@ -25,6 +25,9 @@ int main(int argc, char** argv)
 			ulong pointer = file.get_block_pointer(ContainerType.PICTURE);
 			print(pointer.toString);
 		}
+		else if (file.is_file_wave)
+			read_metadata_wave(file);
+
 		close_file(file);
 	}
 

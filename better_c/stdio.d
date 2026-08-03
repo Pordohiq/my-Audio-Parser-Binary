@@ -1,6 +1,7 @@
 module betterc.stdio;
 
 import betterc.convert;
+import betterc.cstring : Cstring;
 
 public import core.stdc.stdio;
 import core.stdc.string : strlen;
@@ -28,7 +29,7 @@ string[] parse_arguments(int argc, char** argv)
 }
 
 //region PRINT
-void print(string message, string end = "\n")
+void print(const string message, string end = "\n")
 {
 	printf(message.ptr);
 	printf(end.ptr);
@@ -42,6 +43,11 @@ void print(string[] array, string end = "\n", string delim = ", ")
 void print(bool value, string end = "\n")
 {
 	print(value ? "true" : "false", end);
+}
+
+void print(const Cstring message, string end = "\n")
+{
+	print(message.toString, end);
 }
 //endregion
 //region FILES
