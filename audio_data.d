@@ -6,12 +6,14 @@ import betterc.cstring;
 import betterc.dictionary;
 import betterc.stdio : print;
 
+extern (C)
 struct Audio
 {
 	PCM_DATA audio;
 	AudioMetaData* metadata;
 }
 
+extern (C)
 struct AudioMetaData
 {
 	Cstring title;

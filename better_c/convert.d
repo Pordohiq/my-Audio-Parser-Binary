@@ -147,9 +147,15 @@ string toAddress(ulong value)
 }
 //endregion
 
-ulong asUlong(ubyte[8] bytes, bool little_endian = true)
+enum ENDIAN : bool
 {
-    if (little_endian)
+    LITTLE = false,
+    BIG = true
+}
+
+ulong asUlong(ubyte[8] bytes, ENDIAN endian = ENDIAN.LITTLE)
+{
+    if (endian == ENDIAN.LITTLE)
     {
         return (cast(ulong) bytes[0]) |
             (cast(ulong) bytes[1] << 8) |
@@ -179,9 +185,9 @@ ulong asUlong(ubyte[8] bytes, bool little_endian = true)
     }
 }
 
-uint asUint(ubyte[4] bytes, bool little_endian = true)
+uint asUint(ubyte[4] bytes, ENDIAN endian = ENDIAN.LITTLE)
 {
-    if (little_endian)
+    if (endian == ENDIAN.LITTLE)
     {
         return (cast(uint) bytes[0]) |
             (cast(uint) bytes[1] << 8) |
@@ -199,9 +205,9 @@ uint asUint(ubyte[4] bytes, bool little_endian = true)
     }
 }
 
-ushort asUshort(ubyte[2] bytes, bool little_endian = true)
+ushort asUshort(ubyte[2] bytes, ENDIAN endian = ENDIAN.LITTLE)
 {
-    if (little_endian)
+    if (endian == ENDIAN.LITTLE)
     {
         return (cast(ushort) bytes[0]) | (cast(ushort) bytes[1] << 8);
     }

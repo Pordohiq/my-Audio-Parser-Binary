@@ -2,6 +2,8 @@ module betterc.stdint;
 
 const ubyte ULONG_BIT_COUNT = 64;
 const ubyte UINT_BIT_COUNT = 32;
+const ubyte USHORT_BIT_COUNT = 16;
+const ubyte UBYTE_BIT_COUNT = 8;
 
 pure nothrow @safe @nogc
 ulong bit_subrange(const ulong value, const ubyte start, const ubyte end)

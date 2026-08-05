@@ -4,7 +4,7 @@ public import core.stdc.stdlib;
 import core.stdc.string : memcpy;
 
 /// Allocates a dynamic array on the heap
-nothrow @system @nogc
+public nothrow @system @nogc
 T[] allocate_array(T)(ulong length)
 {
 	T* ptr = cast(T*) malloc(T.sizeof * length);

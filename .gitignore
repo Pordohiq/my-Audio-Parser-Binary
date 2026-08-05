@@ -8,3 +8,5 @@
 **/*.dc
 
 *-test-application
+
+.vscode

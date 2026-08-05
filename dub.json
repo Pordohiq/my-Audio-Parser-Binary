@@ -7,15 +7,34 @@
 	"license": "MIT",
 	"name": "my_audio_parser",
 	"targetName": "mapb.dc",
+	"mainSourceFile": "app.d",
 	"targetType": "executable",
 	"dflags": [
 		"-betterC"
+	],
+	"configurations": [
+		{
+			"name": "default"
+		},
+		{
+			"name": "static",
+			"dflags": [
+				"-static"
+			]
+		}
 	],
 	"buildTypes": {
 		"release": {
 			"dflags": [
 				"-Os",
-				"-flto=full"
+				"-flto=full",
+				"-boundscheck=off"
+			]
+		},
+		"debug": {
+			"dflags": [
+				"-O0",
+				"-gc"
 			]
 		}
 	},

@@ -22,8 +22,7 @@ int main(int argc, char** argv)
 		FILE* file = open_file(args[1], FileMode.READ_BYTES);
 		if (file.is_file_flac)
 		{
-			ulong pointer = file.get_block_pointer(ContainerType.PICTURE);
-			print(pointer.toString);
+			read_metadata_flac(file);
 		}
 		else if (file.is_file_wave)
 			read_metadata_wave(file);

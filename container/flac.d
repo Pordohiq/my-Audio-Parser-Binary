@@ -2,7 +2,8 @@ module container.flac;
 
 import betterc.stdint;
 import betterc.stdio;
-import betterc.convert : asUint;
+import betterc.stdlib : allocate_array;
+import betterc.convert : asUint, ENDIAN;
 
 const ubyte FLAC_BLOCK_HEADER_SIZE = 4;
 
@@ -65,7 +66,7 @@ ulong get_block_pointer(FILE* file, ContainerType block_name, ulong starting_poi
 	if (bytes_read != 4)
 		return 0;
 
-	uint block_header = block_header_buffer.asUint(false);
+	uint block_header = block_header_buffer.asUint(ENDIAN.BIG);
 
 	ulong pointer_position = starting_pointer;
 
@@ -75,7 +76,7 @@ ulong get_block_pointer(FILE* file, ContainerType block_name, ulong starting_poi
 		if (bytes_read != 4)
 			return 0;
 
-		block_header = block_header_buffer.asUint(false);
+		block_header = block_header_buffer.asUint(ENDIAN.BIG);
 
 		ContainerType ct = get_block_type(block_header);
 		ulong block_length = get_block_length(block_header);
@@ -91,4 +92,28 @@ ulong get_block_pointer(FILE* file, ContainerType block_name, ulong starting_poi
 	}
 
 	return 0;
+}
+
+ubyte[] read_block_body(FILE* file, ulong header_position)
+{
+	if (!file)
+		return [];
+
+	ubyte[FLAC_BLOCK_HEADER_SIZE] block_header;
+
+	ulong bytes_read = read_buffer(file, block_header.ptr, FLAC_BLOCK_HEADER_SIZE, header_position);
+
+	if (bytes_read != FLAC_BLOCK_HEADER_SIZE)
+		return [];
+
+	ulong block_size = get_block_length(block_header.asUint(ENDIAN.BIG));
+
+	ubyte[] block = allocate_array!ubyte(block_size);
+
+	bytes_read = read_buffer(file, block.ptr, block_size, header_position + FLAC_BLOCK_HEADER_SIZE);
+
+	if (bytes_read != block_size)
+		return [];
+
+	return block;
 }

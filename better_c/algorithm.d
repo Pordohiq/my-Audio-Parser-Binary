@@ -1,5 +1,8 @@
 module betterc.algorithm;
 
+import betterc.stdlib : malloc;
+import betterc.cstring : Cstring;
+
 pure nothrow @safe @nogc
 bool startsWith(ubyte[] haystack, ubyte[] needle)
 {
@@ -30,4 +33,28 @@ bool endsWith(ubyte[] haystack, ubyte[] needle)
 	}
 
 	return true;
+}
+
+void toLowercase(char[] input)
+{
+	foreach (ref c; input)
+	{
+		if (c >= 'A' && c <= 'Z')
+		{
+			c += 32;
+		}
+	}
+}
+
+void toLowercase(char* str, size_t len)
+{
+	if (str !is null)
+	{
+		toLowercase(str[0 .. len]);
+	}
+}
+
+void toLowercase(Cstring input)
+{
+	toLowercase(input.start, input.length);
 }

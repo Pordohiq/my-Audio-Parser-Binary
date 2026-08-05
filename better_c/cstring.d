@@ -3,7 +3,7 @@ module betterc.cstring;
 public import core.stdc.string;
 
 import betterc.stdio : snprintf;
-import betterc.stdlib : duplicate_array;
+import betterc.stdlib : duplicate_array, allocate_array, copy_array;
 
 extern (C) nothrow pure
 struct Cstring
@@ -29,12 +29,40 @@ struct Cstring
 		this.start = cast(char*) buffer.ptr;
 	}
 
+	this(char[] buffer)
+	{
+		this.length = buffer.length;
+		this.start = buffer.ptr;
+	}
+
 	string toString() const
 	{
 		if (start == null || length == 0)
 			return "";
 
 		return cast(string) start[0 .. length];
+	}
+
+	int opCmp(Cstring other) const
+	{
+		ulong minLen = this.length < other.length ? this.length : other.length;
+		int cmp = memcmp(this.start, other.start, cast(size_t) minLen);
+
+		if (cmp != 0)
+			return cmp;
+
+		if (this.length < other.length)
+			return -1;
+
+		if (this.length > other.length)
+			return 1;
+
+		return 0;
+	}
+
+	bool opEquals(Cstring other) const
+	{
+		return this.opCmp(other) == 0;
 	}
 }
 
@@ -65,4 +93,22 @@ string toString(T)(T val)
 	{
 		return val.toString(buf);
 	}
+}
+
+Cstring[] splitByFirst(Cstring input, char delimiter)
+{
+	for (size_t i = 0; i < input.length; i++)
+	{
+		if (input.start[i] == delimiter)
+		{
+			Cstring[] result = allocate_array!Cstring(2);
+			result[0] = Cstring(copy_array(input.toString(), 0, i));
+			result[1] = Cstring(copy_array(input.toString(), i + 1, input.length));
+			return result;
+		}
+	}
+
+	Cstring[] result = allocate_array!Cstring(1);
+	result[0] = input;
+	return result;
 }
