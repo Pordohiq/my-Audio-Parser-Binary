@@ -2,6 +2,8 @@ module audio_data;
 
 import pcm;
 
+import betterc.dictionary;
+
 struct Audio
 {
 	PCM_DATA audio;
@@ -16,4 +18,6 @@ struct AudioMetaData
 	string number;
 	string year;
 	string genre;
+
+	Dictionary!(string, string) other_values;
 }

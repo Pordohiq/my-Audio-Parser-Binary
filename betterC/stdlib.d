@@ -15,6 +15,19 @@ T[] allocate_array(T)(ulong length)
 	return ptr[0 .. length];
 }
 
+nothrow
+void resize_array(T)(T[] array, ulong new_size)
+{
+	T[] new_array = allocate_array!T(new_size);
+	for (ulong i = 0; i < array.length; i++)
+	{
+		new_array[i] = array[i];
+	}
+
+	array.ptr = new_array.ptr;
+	array.length = new_array.length;
+}
+
 nothrow @system @nogc
 T[] copy_array(T)(T[] original_array, ulong start_index, ulong end_index)
 {

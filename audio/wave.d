@@ -6,6 +6,7 @@ import betterc.stdio;
 import betterc.stdlib;
 import betterc.convert;
 import betterc.algorithm;
+import betterc.dictionary;
 
 import audio_data;
 
