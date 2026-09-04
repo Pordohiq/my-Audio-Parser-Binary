@@ -8,3 +8,8 @@
 **/*.dc
 
 *-test-application
+*-test-default
+
+.vscode
+
+**/*allocations_log.txt

@@ -15,7 +15,15 @@
 		"release": {
 			"dflags": [
 				"-Os",
-				"-flto=full"
+				"-flto=full",
+				"-boundscheck=off"
+			]
+		},
+		"debug": {
+			"dflags": [
+				"-O0",
+				"-gc",
+				"-d-debug"
 			]
 		}
 	},

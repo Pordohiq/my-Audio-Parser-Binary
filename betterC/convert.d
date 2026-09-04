@@ -1,15 +1,14 @@
 module betterc.convert;
 
-import betterc.stdlib : allocate_array;
+import betterc.stdlib : allocate_array, allocate, free;
 
-import core.stdc.stdlib : malloc, free;
 import core.stdc.stdio : snprintf;
 
 string join_array(string[] arr, string delim = ", ")
 {
     if (arr.length == 0)
     {
-        char* buffer = cast(char*) malloc(2);
+        char* buffer = cast(char*) allocate(2);
         if (!buffer)
             return null;
         buffer[0] = '[';
@@ -27,7 +26,7 @@ string join_array(string[] arr, string delim = ", ")
         }
     }
 
-    char* buffer = cast(char*) malloc(totalLen);
+    char* buffer = cast(char*) allocate(totalLen);
     if (!buffer)
         return null;
 
@@ -64,7 +63,7 @@ string toString(long value)
     if (len <= 0)
         return null;
 
-    char* buf = cast(char*) malloc(len + 1);
+    char* buf = cast(char*) allocate(len + 1);
     if (!buf)
         return null;
 
@@ -79,7 +78,7 @@ string toString(double value, int precision = 6)
     if (len <= 0)
         return null;
 
-    char* buf = cast(char*) malloc(len + 1);
+    char* buf = cast(char*) allocate(len + 1);
     if (!buf)
         return null;
 
@@ -100,14 +99,14 @@ string toString(const ubyte[] values)
     if (values.length == 0)
         return [];
 
-    auto hexArrStorage = cast(string*) malloc(values.length * string.sizeof);
+    auto hexArrStorage = cast(string*) allocate(values.length * string.sizeof);
     if (!hexArrStorage)
         return null;
     string[] hexArr = hexArrStorage[0 .. values.length];
 
     foreach (i, val; values)
     {
-        char* buf = cast(char*) malloc(3);
+        char* buf = cast(char*) allocate(3);
         if (!buf)
             return null;
         snprintf(buf, 3, "%02x", val);

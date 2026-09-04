@@ -1,17 +1,17 @@
 module betterc.stdio;
 
 import betterc.convert;
+import betterc.stdlib : allocate, free;
 
 public import core.stdc.stdio;
 import core.stdc.string : strlen;
-import core.stdc.stdlib : malloc, free;
 
 string[] parse_arguments(int argc, char** argv)
 {
 	string[] args;
 	if (argc > 0)
 	{
-		void* mem = malloc(argc * string.sizeof);
+		void* mem = allocate(argc * string.sizeof);
 		if (!mem)
 			return [];
 
@@ -30,8 +30,14 @@ string[] parse_arguments(int argc, char** argv)
 //region PRINT
 void print(string message, string end = "\n")
 {
-	printf(message.ptr);
-	printf(end.ptr);
+	for (ulong i = 0; i < message.length; i++)
+	{
+		putchar(message[i]);
+	}
+	for (ulong i = 0; i < end.length; i++)
+	{
+		putchar(end[i]);
+	}
 }
 
 void print(string[] array, string end = "\n", string delim = ", ")
@@ -103,7 +109,7 @@ ubyte[] read_file_bytes(string path)
 	FILE* file = fopen(path.ptr, "rb");
 
 	ubyte[] buffer;
-	void* mem = malloc(cast(size_t) f_size);
+	void* mem = allocate(cast(size_t) f_size);
 
 	if (!mem)
 	{
